@@ -1,5 +1,4 @@
 const CACHE_SECONDS = 21600;
-const WEB_CACHE_FILE = '.juggler-web-cache.json';
 
 function doGet() {
   return json_({ ok: true, service: 'juggler-web-api', version: 2 });
@@ -21,12 +20,6 @@ function doPost(e) {
     if (action === 'auth') return json_({ ok: true, data: { authenticated: true } });
 
     const latest = latestBackup_(folderId);
-    if (action === 'summary') {
-      const diskCached = readSummaryCache_(folderId, latest);
-      if (diskCached) {
-        return ContentService.createTextOutput(diskCached).setMimeType(ContentService.MimeType.JSON);
-      }
-    }
 
     const cache = CacheService.getScriptCache();
     const cacheKey = cacheKey_(latest, action, request);
@@ -43,40 +36,11 @@ function doPost(e) {
       : convert_(source, latest);
     const text = JSON.stringify({ ok: true, data: output });
 
-    if (action === 'summary') {
-      try { writeSummaryCache_(folderId, latest, text); } catch (_) { /* 読み取り権限だけでも表示を継続 */ }
-    }
     if (text.length < 90000) cache.put(cacheKey, text, CACHE_SECONDS);
     return ContentService.createTextOutput(text).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return json_({ ok: false, error: String(error.message || error) });
   }
-}
-
-function readSummaryCache_(folderId, sourceFile) {
-  const files = DriveApp.getFolderById(folderId).getFilesByName(WEB_CACHE_FILE);
-  if (!files.hasNext()) return null;
-  const file = files.next();
-  try {
-    const cached = JSON.parse(file.getBlob().getDataAsString('UTF-8'));
-    if (cached.sourceId !== sourceFile.getId()) return null;
-    if (Number(cached.sourceUpdated) !== sourceFile.getLastUpdated().getTime()) return null;
-    return JSON.stringify(cached.response);
-  } catch (_) {
-    return null;
-  }
-}
-
-function writeSummaryCache_(folderId, sourceFile, responseText) {
-  const folder = DriveApp.getFolderById(folderId);
-  const payload = JSON.stringify({
-    sourceId: sourceFile.getId(),
-    sourceUpdated: sourceFile.getLastUpdated().getTime(),
-    response: JSON.parse(responseText)
-  });
-  const files = folder.getFilesByName(WEB_CACHE_FILE);
-  if (files.hasNext()) files.next().setContent(payload);
-  else folder.createFile(WEB_CACHE_FILE, payload, MimeType.PLAIN_TEXT);
 }
 
 function cacheKey_(file, action, request) {
@@ -98,7 +62,7 @@ function latestBackup_(folderId) {
   let latest = null;
   while (files.hasNext()) {
     const file = files.next();
-    if (!/\.json$/i.test(file.getName()) || file.getName() === WEB_CACHE_FILE) continue;
+    if (!/\.json$/i.test(file.getName())) continue;
     if (!latest || file.getLastUpdated() > latest.getLastUpdated()) latest = file;
   }
   if (!latest) {
