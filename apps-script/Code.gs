@@ -43,7 +43,9 @@ function doPost(e) {
       : convert_(source, latest);
     const text = JSON.stringify({ ok: true, data: output });
 
-    if (action === 'summary') writeSummaryCache_(folderId, latest, text);
+    if (action === 'summary') {
+      try { writeSummaryCache_(folderId, latest, text); } catch (_) { /* 読み取り権限だけでも表示を継続 */ }
+    }
     if (text.length < 90000) cache.put(cacheKey, text, CACHE_SECONDS);
     return ContentService.createTextOutput(text).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
