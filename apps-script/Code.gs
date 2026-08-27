@@ -1,7 +1,7 @@
 const CACHE_SECONDS = 300;
 
 function doGet() {
-  return json_({ ok: true, service: 'juggler-web-api', version: 1 });
+  return json_({ ok: true, service: 'juggler-web-api', version: 2 });
 }
 
 function doPost(e) {
@@ -16,9 +16,10 @@ function doPost(e) {
       return json_({ ok: false, error: 'PINが違います' });
     }
 
-    const cache = CacheService.getScriptCache();
     const latest = latestBackup_(folderId);
-    const cacheKey = 'summary-' + latest.getId() + '-' + latest.getLastUpdated().getTime();
+    const action = String(request.action || 'summary');
+    const cache = CacheService.getScriptCache();
+    const cacheKey = cacheKey_(latest, action, request);
     const cached = cache.get(cacheKey);
     if (cached) return ContentService.createTextOutput(cached).setMimeType(ContentService.MimeType.JSON);
 
@@ -27,13 +28,29 @@ function doPost(e) {
       throw new Error('履歴バックアップ形式ではありません');
     }
 
-    const output = convert_(source, latest);
+    const output = action === 'events'
+      ? convertEvents_(source, request, latest)
+      : convert_(source, latest);
     const text = JSON.stringify({ ok: true, data: output });
     if (text.length < 90000) cache.put(cacheKey, text, CACHE_SECONDS);
     return ContentService.createTextOutput(text).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return json_({ ok: false, error: String(error.message || error) });
   }
+}
+
+function cacheKey_(file, action, request) {
+  const raw = [
+    action,
+    request.hall || '',
+    request.machine || '',
+    request.number || '',
+    request.date || ''
+  ].join('|');
+  const digest = Utilities.base64EncodeWebSafe(
+    Utilities.computeDigest(Utilities.DigestAlgorithm.MD5, raw)
+  ).slice(0, 20);
+  return 'v2-' + file.getId() + '-' + file.getLastUpdated().getTime() + '-' + digest;
 }
 
 function latestBackup_(folderId) {
@@ -54,6 +71,43 @@ function latestBackup_(folderId) {
   }
   if (!latest) throw new Error('バックアップJSONが見つかりません');
   return latest;
+}
+
+function convertEvents_(source, request, file) {
+  const sourceEvents = Array.isArray(source.events)
+    ? source.events
+    : (Array.isArray(source.bonusEvents) ? source.bonusEvents : []);
+  const hall = String(request.hall || '');
+  const machine = String(request.machine || '');
+  const number = String(request.number || '');
+  const date = String(request.date || '');
+
+  const events = sourceEvents.map(e => ({
+    date: String(e.date || e.businessDate || ''),
+    hall: String(e.hall || ''),
+    machine: String(e.kishu || e.machine || ''),
+    number: String(e.daiban || e.number || ''),
+    seq: Number(e.seq || 0),
+    time: String(e.time || ''),
+    gameGap: Number(e.gameGap != null ? e.gameGap : (e.gap || 0)),
+    type: String(e.type || ''),
+    capturedAt: Number(e.capturedAt || 0)
+  })).filter(e =>
+    (!hall || e.hall === hall) &&
+    (!machine || e.machine === machine) &&
+    (!number || e.number === number) &&
+    (!date || e.date === date)
+  ).sort((a, b) => a.seq - b.seq);
+
+  return {
+    schemaVersion: 4,
+    generatedAt: Utilities.formatDate(file.getLastUpdated(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'),
+    hall: hall,
+    machine: machine,
+    number: number,
+    date: date,
+    events: events
+  };
 }
 
 function convert_(source, file) {
@@ -84,7 +138,7 @@ function convert_(source, file) {
   const dates = new Set(records.map(r => r.date));
 
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
     generatedAt: Utilities.formatDate(file.getLastUpdated(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'),
     sourceFile: file.getName(),
     sourceExportedAt: source.exportedAt || 0,
