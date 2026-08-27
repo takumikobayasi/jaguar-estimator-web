@@ -31,15 +31,16 @@
     </section>
   </main>
   <div id="viewer" class="app hidden">
-    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><h1 id="pageTitle">履歴</h1><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v0.2.1</span><span class="live">閲覧専用</span></div></header>
+    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><h1 id="pageTitle">履歴</h1><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v0.3.0</span><span class="live">閲覧専用</span></div></header>
     <div class="toolbar"><select id="hall"><option>すべての店舗</option></select><button id="reload" class="reload">↻ 更新</button></div><div id="subtabs" class="subtabs"></div><section id="content"></section>
     <nav aria-label="メインメニュー"><button data-tab="history" class="active">履歴</button><button data-tab="targets">狙い台</button><button data-tab="lab">ラボ</button></nav>
   </div>
+  <script src="config.js"></script>
   <script>
-    const DEMO_PIN='2525'; const state={tab:'history',mode:'日別',data:null}; const modes={history:['日別','📷','台別','小役','情報'],targets:['ランキング','島レイアウト','REG甘さ'],lab:['サマリー','機種別','曜日別']};
+    const state={tab:'history',mode:'日別',data:null,pin:''}; const modes={history:['日別','📷','台別','小役','情報'],targets:['ランキング','島レイアウト','REG甘さ'],lab:['サマリー','機種別','曜日別']};
     const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    async function loadData(){const r=await fetch('./sample-data.json',{cache:'no-store'});if(!r.ok)throw new Error();return r.json()}
-    document.querySelector('#pinForm').addEventListener('submit',async e=>{e.preventDefault();if(document.querySelector('#pin').value!==DEMO_PIN){document.querySelector('#error').textContent='PINが違います';return}try{state.data=await loadData();sessionStorage.setItem('jv','1');openViewer()}catch{document.querySelector('#error').textContent='データを読み込めませんでした'}});
+    async function loadData(){const api=window.JUGGLER_API_URL||'';if(api){const r=await fetch(api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({pin:state.pin})});if(!r.ok)throw new Error('API接続エラー');const result=await r.json();if(!result.ok)throw new Error(result.error||'読込エラー');return result.data}const r=await fetch('./sample-data.json',{cache:'no-store'});if(!r.ok)throw new Error();return r.json()}
+    document.querySelector('#pinForm').addEventListener('submit',async e=>{e.preventDefault();state.pin=document.querySelector('#pin').value.trim();if(!state.pin){document.querySelector('#error').textContent='PINを入力してください';return}try{state.data=await loadData();openViewer()}catch(err){document.querySelector('#error').textContent=err.message||'データを読み込めませんでした'}});
     function openViewer(){document.querySelector('#login').classList.add('hidden');document.querySelector('#viewer').classList.remove('hidden');document.querySelector('#updated').textContent=`最終更新 ${state.data.generatedAt}`;let halls=[...new Set(state.data.history.map(x=>x.hall))];document.querySelector('#hall').innerHTML='<option>すべての店舗</option>'+halls.map(x=>`<option>${esc(x)}</option>`).join('');render()}
     document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{state.tab=b.dataset.tab;state.mode=modes[state.tab][0];document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));render()});
     function metrics(items){let games=items.reduce((a,x)=>a+x.games,0),big=items.reduce((a,x)=>a+x.big,0),reg=items.reduce((a,x)=>a+x.reg,0);return `<div class="summary"><div class="metric"><span>総回転</span><strong>${games.toLocaleString()}</strong></div><div class="metric"><span>BIG</span><strong>${big}</strong></div><div class="metric"><span>REG</span><strong>${reg}</strong></div></div>`}
@@ -57,7 +58,6 @@
       let labels=state.mode==='機種別'?['マイジャグV','ゴーゴー3','アイムEX']:['月','火','水','木','金','土','日'];return `<div class="card"><div class="title">${state.mode}の傾向</div><div class="bars">${labels.map((x,i)=>`<div class="barrow"><span>${x}</span><div class="bar"><i style="width:${45+i*6}%"></i></div><b>${(1.8+i*.12).toFixed(2)}</b></div>`).join('')}</div><div class="meta">実データ接続後にアプリと同じ集計値へ置換します</div></div>`}
     function render(){const titles={history:'履歴',targets:'狙い台',lab:'ラボ'};document.querySelector('#pageTitle').textContent=titles[state.tab];subtabs();document.querySelector('#content').innerHTML=state.tab==='history'?historyView():state.tab==='targets'?targetView():labView()}
     document.querySelector('#hall').onchange=render;document.querySelector('#reload').onclick=async()=>{state.data=await loadData();openViewer()};
-    if(sessionStorage.getItem('jv'))loadData().then(d=>{state.data=d;openViewer()}).catch(()=>sessionStorage.removeItem('jv'));
-  </script>
+</script>
 </body>
 </html>
