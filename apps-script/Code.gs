@@ -100,7 +100,7 @@ function convertEvents_(source, request, file) {
   ).sort((a, b) => a.seq - b.seq);
 
   return {
-    schemaVersion: 4,
+    schemaVersion: 5,
     generatedAt: Utilities.formatDate(file.getLastUpdated(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'),
     hall: hall,
     machine: machine,
@@ -138,9 +138,17 @@ function convert_(source, file) {
   const dates = new Set(records.map(r => r.date));
 
   return {
-    schemaVersion: 4,
+    schemaVersion: 5,
     generatedAt: Utilities.formatDate(file.getLastUpdated(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'),
     sourceFile: file.getName(),
+    balances: (Array.isArray(source.balances) ? source.balances : []).map(b => ({
+      hall: String(b.hall || ''),
+      date: String(b.date || b.businessDate || ''),
+      invest: Number(b.invest || 0),
+      payout: Number(b.payout || 0),
+      net: Number(b.net != null ? b.net : Number(b.payout || 0) - Number(b.invest || 0)),
+      memo: String(b.memo || '')
+    })),
     sourceExportedAt: source.exportedAt || 0,
     latestDate: latestDate,
     history: records,
