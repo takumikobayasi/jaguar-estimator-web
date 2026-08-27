@@ -1,4 +1,5 @@
-const CACHE_SECONDS = 300;
+const CACHE_SECONDS = 21600;
+const WEB_CACHE_FILE = '.juggler-web-cache.json';
 
 function doGet() {
   return json_({ ok: true, service: 'juggler-web-api', version: 2 });
@@ -16,8 +17,17 @@ function doPost(e) {
       return json_({ ok: false, error: 'PINが違います' });
     }
 
-    const latest = latestBackup_(folderId);
     const action = String(request.action || 'summary');
+    if (action === 'auth') return json_({ ok: true, data: { authenticated: true } });
+
+    const latest = latestBackup_(folderId);
+    if (action === 'summary') {
+      const diskCached = readSummaryCache_(folderId, latest);
+      if (diskCached) {
+        return ContentService.createTextOutput(diskCached).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+
     const cache = CacheService.getScriptCache();
     const cacheKey = cacheKey_(latest, action, request);
     const cached = cache.get(cacheKey);
@@ -32,11 +42,39 @@ function doPost(e) {
       ? convertEvents_(source, request, latest)
       : convert_(source, latest);
     const text = JSON.stringify({ ok: true, data: output });
+
+    if (action === 'summary') writeSummaryCache_(folderId, latest, text);
     if (text.length < 90000) cache.put(cacheKey, text, CACHE_SECONDS);
     return ContentService.createTextOutput(text).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return json_({ ok: false, error: String(error.message || error) });
   }
+}
+
+function readSummaryCache_(folderId, sourceFile) {
+  const files = DriveApp.getFolderById(folderId).getFilesByName(WEB_CACHE_FILE);
+  if (!files.hasNext()) return null;
+  const file = files.next();
+  try {
+    const cached = JSON.parse(file.getBlob().getDataAsString('UTF-8'));
+    if (cached.sourceId !== sourceFile.getId()) return null;
+    if (Number(cached.sourceUpdated) !== sourceFile.getLastUpdated().getTime()) return null;
+    return JSON.stringify(cached.response);
+  } catch (_) {
+    return null;
+  }
+}
+
+function writeSummaryCache_(folderId, sourceFile, responseText) {
+  const folder = DriveApp.getFolderById(folderId);
+  const payload = JSON.stringify({
+    sourceId: sourceFile.getId(),
+    sourceUpdated: sourceFile.getLastUpdated().getTime(),
+    response: JSON.parse(responseText)
+  });
+  const files = folder.getFilesByName(WEB_CACHE_FILE);
+  if (files.hasNext()) files.next().setContent(payload);
+  else folder.createFile(WEB_CACHE_FILE, payload, MimeType.PLAIN_TEXT);
 }
 
 function cacheKey_(file, action, request) {
@@ -58,7 +96,7 @@ function latestBackup_(folderId) {
   let latest = null;
   while (files.hasNext()) {
     const file = files.next();
-    if (!/\.json$/i.test(file.getName())) continue;
+    if (!/\.json$/i.test(file.getName()) || file.getName() === WEB_CACHE_FILE) continue;
     if (!latest || file.getLastUpdated() > latest.getLastUpdated()) latest = file;
   }
   if (!latest) {
@@ -82,7 +120,7 @@ function convertEvents_(source, request, file) {
   const number = String(request.number || '');
   const date = String(request.date || '');
 
-  const events = sourceEvents.map(e => ({
+  const events = sourceEvents.filter(e => isJugglerMachine_(e.kishu || e.machine || '')).map(e => ({
     date: String(e.date || e.businessDate || ''),
     hall: String(e.hall || ''),
     machine: String(e.kishu || e.machine || ''),
@@ -100,7 +138,7 @@ function convertEvents_(source, request, file) {
   ).sort((a, b) => a.seq - b.seq);
 
   return {
-    schemaVersion: 5,
+    schemaVersion: 6,
     generatedAt: Utilities.formatDate(file.getLastUpdated(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'),
     hall: hall,
     machine: machine,
@@ -111,7 +149,7 @@ function convertEvents_(source, request, file) {
 }
 
 function convert_(source, file) {
-  const records = source.records.map(r => ({
+  const records = source.records.filter(r => isJugglerMachine_(r.kishu || r.machine || '')).map(r => ({
     date: r.date,
     hall: r.hall,
     machine: r.kishu,
@@ -138,7 +176,7 @@ function convert_(source, file) {
   const dates = new Set(records.map(r => r.date));
 
   return {
-    schemaVersion: 5,
+    schemaVersion: 6,
     generatedAt: Utilities.formatDate(file.getLastUpdated(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm'),
     sourceFile: file.getName(),
     balances: (Array.isArray(source.balances) ? source.balances : []).map(b => ({
@@ -164,6 +202,12 @@ function convert_(source, file) {
       ]
     }
   };
+}
+
+
+function isJugglerMachine_(name) {
+  const n = String(name || '');
+  return /ｼﾞｬｸﾞ|ジャグ|JUGGLER/i.test(n) || /ﾈｵｱｲﾑ|ネオアイム|ｱｲﾑEX|アイムEX/.test(n);
 }
 
 function json_(value) {
