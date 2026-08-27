@@ -86,7 +86,7 @@ function convertEvents_(source, request, file) {
   const number = String(request.number || '');
   const date = String(request.date || '');
 
-  const events = sourceEvents.filter(e => isJugglerMachine_(e.kishu || e.machine || '')).map(e => ({
+  const events = sourceEvents.map(e => ({
     date: String(e.date || e.businessDate || ''),
     hall: String(e.hall || ''),
     machine: String(e.kishu || e.machine || ''),
@@ -115,7 +115,7 @@ function convertEvents_(source, request, file) {
 }
 
 function convert_(source, file) {
-  const records = source.records.filter(r => isJugglerMachine_(r.kishu || r.machine || '')).map(r => ({
+  const records = source.records.map(r => ({
     date: r.date,
     hall: r.hall,
     machine: r.kishu,
@@ -171,10 +171,6 @@ function convert_(source, file) {
 }
 
 
-function isJugglerMachine_(name) {
-  const n = String(name || '');
-  return /ｼﾞｬｸﾞ|ジャグ|JUGGLER/i.test(n) || /ﾈｵｱｲﾑ|ネオアイム|ｱｲﾑEX|アイムEX/.test(n);
-}
 
 function json_(value) {
   return ContentService.createTextOutput(JSON.stringify(value)).setMimeType(ContentService.MimeType.JSON);
