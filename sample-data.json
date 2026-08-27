@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "デモデータ",
+  "history": [
+    {"date":"2026/08/27","hall":"サンプル店A","machine":"マイジャグラーV","number":"101","games":4200,"big":18,"reg":17},
+    {"date":"2026/08/26","hall":"サンプル店A","machine":"ゴーゴージャグラー3","number":"102","games":3800,"big":15,"reg":14}
+  ],
+  "targets": [
+    {"hall":"サンプル店A","machine":"マイジャグラーV","number":"101","score":82,"reason":"デモ用の狙い理由"},
+    {"hall":"サンプル店A","machine":"ゴーゴージャグラー3","number":"102","score":74,"reason":"デモ用の候補"}
+  ],
+  "lab": {
+    "machines": 10,
+    "avgGames": 4000,
+    "setting": "2.10",
+    "rows": [
+      {"label":"短G ≤100率","value":"45%","note":"架空のデモ集計"},
+      {"label":"REG平均","value":"1/330","note":"架空のデモ集計"},
+      {"label":"高設定候補率","value":"10%","note":"架空のデモ集計"}
+    ]
+  }
+}
