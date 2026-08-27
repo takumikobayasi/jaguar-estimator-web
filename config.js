@@ -1,0 +1,1 @@
+window.JUGGLER_API_URL = '';\n
