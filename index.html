@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#08111f">
-  <meta name="description" content="ジャグラーデータの履歴・狙い台を確認する閲覧専用サイト">
+  <meta name="description" content="ジャグラーデータの履歴・狙い台・取得情報を確認する閲覧専用サイト">
   <link rel="manifest" href="manifest.webmanifest">
   <title>JUGGLER VIEW</title>
   <style>
@@ -18,7 +18,7 @@
     header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:4px 0 12px}header h1{margin:0;font-size:25px;letter-spacing:.02em}.updated{margin-top:7px;color:var(--muted);font-size:12px}.headmeta{display:flex;align-items:center;gap:7px}.version{padding:6px 8px;border:1px solid var(--line);border-radius:8px;color:var(--green);font-size:10px;font-weight:900;white-space:nowrap}.live{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid #255f49;border-radius:999px;background:#0b2a20;color:var(--green);font-size:11px;font-weight:800}.live:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green)}
     .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px}.metric{padding:15px 12px;background:linear-gradient(145deg,#122034,#0c1726);border:1px solid var(--line);border-radius:17px}.metric span{display:block;color:var(--muted);font-size:11px}.metric strong{display:block;margin-top:7px;font-size:20px}
     .section-title{margin:25px 2px 12px;font-size:13px;color:var(--muted);font-weight:800}.list{display:grid;gap:10px}.card{padding:17px;background:rgba(14,26,42,.92);border:1px solid var(--line);border-radius:18px}.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.title{font-weight:800}.meta{margin-top:6px;color:var(--muted);font-size:12px}.badge{flex:none;padding:6px 9px;border-radius:9px;background:#1b2b40;color:#c9d5e5;font-size:11px;font-weight:800}.rank{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#23354d;color:var(--yellow);font-weight:900}.prob{color:var(--green);font-weight:900}.empty{padding:34px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:18px}
-    nav{position:sticky;z-index:5;top:0;display:grid;grid-template-columns:repeat(3,1fr);width:100%;margin:0 0 14px;padding:8px;background:rgba(7,16,29,.93);border:1px solid var(--line);border-radius:15px;backdrop-filter:blur(18px)}nav button{padding:10px 3px;border:0;border-radius:11px;background:transparent;color:var(--muted);font-size:12px;font-weight:500;letter-spacing:.01em}nav button.active{background:#15253a;color:var(--green);font-weight:650}
+    nav{position:sticky;z-index:5;top:0;display:grid;grid-template-columns:repeat(4,1fr);width:100%;margin:0 0 14px;padding:8px;background:rgba(7,16,29,.93);border:1px solid var(--line);border-radius:15px;backdrop-filter:blur(18px)}nav button{padding:10px 3px;border:0;border-radius:11px;background:transparent;color:var(--muted);font-size:12px;font-weight:500;letter-spacing:.01em}nav button.active{background:#15253a;color:var(--green);font-weight:650}
     @media(min-width:680px){.app{padding-top:34px}.summary{gap:14px}.metric{padding:20px}.card{padding:20px}}
   .toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-bottom:10px}.toolbar select,.reload{padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--text)}.subtabs{display:flex;gap:7px;overflow-x:auto;margin-bottom:13px;scrollbar-width:none}.subtab{flex:none;padding:8px 13px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);font-size:12px}.subtab.active{border-color:#47b889;background:#123528;color:var(--green)}.notice{padding:10px 12px;margin-bottom:11px;border-radius:11px;background:#172b3b;color:#baddf8;font-size:11px}.table{width:100%;border-collapse:collapse;font-size:11px}.table th,.table td{padding:10px 5px;text-align:right;border-bottom:1px solid var(--line)}.table th:first-child,.table td:first-child{text-align:left}.table th{color:var(--muted)}.progress{height:6px;margin-top:10px;border-radius:5px;background:#283242;overflow:hidden}.progress i{display:block;height:100%;background:linear-gradient(90deg,#55b7ff,var(--green))}.bars{display:grid;gap:10px;margin-top:12px}.barrow{display:grid;grid-template-columns:74px 1fr 42px;gap:8px;align-items:center;font-size:11px}.bar{height:8px;border-radius:5px;background:#293345;overflow:hidden}.bar i{display:block;height:100%;background:#55b7ff}
     .theme-toggle{display:grid;place-items:center;width:31px;height:31px;padding:0;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);cursor:pointer}
@@ -123,19 +123,19 @@
   <main id="login" class="login">
     <section class="login-card">
       <div class="mark">G!</div><p class="eyebrow">PRIVATE VIEWER</p><h1>JUGGLER VIEW</h1>
-      <p class="sub">履歴・狙い台を、どの端末からでも。</p>
+      <p class="sub">履歴・狙い台・取得情報を、どの端末からでも。</p>
       <form id="pinForm"><input id="pin" class="pin" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="PIN" aria-label="共通PIN"><button class="primary">確認する</button><p id="error" class="error"></p></form>
     </section>
   </main>
   <div id="viewer" class="app hidden">
-    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v1.9.3</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="表示色を切り替える">☀</button><span class="live">閲覧専用</span></div></header>
-    <nav aria-label="メインメニュー"><button data-tab="history" class="active">📚 履歴</button><button data-tab="targets">🎯 狙い台</button><button id="hallToggle" type="button">🏬 店舗</button></nav>
+    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v1.9.4</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="表示色を切り替える">☀</button><span class="live">閲覧専用</span></div></header>
+    <nav aria-label="メインメニュー"><button data-tab="history" class="active">📚 履歴</button><button data-tab="targets">🎯 狙い台</button><button data-tab="capture">🗓️ 取得情報</button><button id="hallToggle" type="button">🏬 店舗</button></nav>
     <div id="subtabs" class="subtabs mode-tabs"></div><section class="filter-panel"><div class="filter-actions info-toolbar"><select id="date" class="hidden" aria-label="カレンダー"><option>日付</option></select><span id="categoryStatus" class="category-status">🎰 機種選択</span><select id="sortOrder" aria-label="並び替え"><option value="number-asc">台番号順</option><option value="machine-asc">機種名順</option><option value="games-desc">G 多い順</option><option value="big-desc">B 多い順</option><option value="reg-desc">R 多い順</option><option value="bonus-rate">合算 良い順</option><option value="setting-desc">推定 高い順</option></select><button id="reload" class="reload" aria-label="データを更新">↻</button></div><div id="weekDates" class="week-dates"></div><div id="machineChecks" class="machine-checks-inline"></div><div id="hallBackdrop" class="sheet-backdrop hidden"></div><div id="hallSheet" class="hall-sheet hidden"></div></section><section id="content"></section>
     
   </div>
   <script src="config.js"></script>
   <script>
-    const state={tab:'history',mode:'日別',data:null,pin:'',hall:'',machines:[],number:'',events:null,eventsKey:'',eventsLoading:false,sort:'number-asc'}; const modes={history:['日別','台別','グラフ','つぶ履歴','取得状況','情報'],targets:['ランキング','島レイアウト','REG甘さ','見取図'],lab:['サマリー','機種別','曜日別','月別']};
+    const state={tab:'history',mode:'日別',data:null,pin:'',hall:'',machines:[],number:'',events:null,eventsKey:'',eventsLoading:false,sort:'number-asc'}; const modes={history:['日別','台別','グラフ','つぶ履歴','情報'],capture:[],targets:['ランキング','島レイアウト','REG甘さ','見取図'],lab:['サマリー','機種別','曜日別','月別']};
     function applyTheme(theme){document.documentElement.dataset.theme=theme;const b=document.querySelector('#themeToggle');if(b){b.textContent=theme==='light'?'🌙':'☀';b.title=theme==='light'?'ダーク表示にする':'ホワイト表示にする'}}
     let savedTheme='dark';try{savedTheme=localStorage.getItem('juggler-view-theme')||'dark'}catch(_){}
     applyTheme(savedTheme);
@@ -214,7 +214,7 @@
       if(state.mode==='機種別')return statsTable(groupedStats(x=>x.machine).sort((a,b)=>b.games-a.games));
       if(state.mode==='曜日別'){const names=['日','月','火','水','木','金','土'];return statsTable(groupedStats(x=>names[new Date(normDate(x.date)+'T00:00:00').getDay()]+'曜日').sort((a,b)=>names.indexOf(a.label[0])-names.indexOf(b.label[0])))}
       return statsTable(groupedStats(x=>normDate(x.date).slice(0,7)).sort((a,b)=>b.label.localeCompare(a.label)))}
-    function render(){subtabs();document.querySelector('#content').innerHTML=state.tab==='history'?historyView():state.tab==='targets'?targetView():labView();if(state.tab==='history')wireHistory();enableHorizontalDrag()}
+    function render(){subtabs();document.querySelector('#content').innerHTML=state.tab==='history'?historyView():state.tab==='targets'?targetView():state.tab==='capture'?captureView():labView();if(state.tab==='history')wireHistory();enableHorizontalDrag()}
     document.querySelector('#date').onchange=()=>{state.events=null;state.eventsKey='';renderMachines();render()};document.querySelector('#reload').onclick=async()=>{const b=document.querySelector('#reload');b.disabled=true;b.textContent='…';try{state.data=await loadData();openViewer()}catch(err){alert(err.message||'更新できませんでした')}finally{b.disabled=false;b.textContent='↻'}};
 </script>
 </body>
