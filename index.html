@@ -117,6 +117,8 @@
 
     .info-toolbar .reload{position:static!important;right:auto!important;margin:0!important;width:42px!important}.week-dates{position:relative;z-index:1}
     @media(max-width:480px){.info-toolbar{grid-template-columns:auto minmax(0,1fr) 42px}.filter-panel{padding-bottom:12px}}
+
+    .info-toolbar{grid-template-columns:minmax(0,1fr) 42px!important}.category-status{padding:0 4px}.info-toolbar .reload{justify-self:end}
 </style>
 </head>
 <body>
@@ -128,9 +130,9 @@
     </section>
   </main>
   <div id="viewer" class="app hidden">
-    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v1.10.0</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="表示色を切り替える">☀</button><span class="live">閲覧専用</span></div></header>
+    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v1.10.1</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="表示色を切り替える">☀</button><span class="live">閲覧専用</span></div></header>
     <nav aria-label="メインメニュー"><button data-tab="history" class="active">📚 履歴</button><button data-tab="targets">🎯 狙い台</button><button data-tab="capture">🗓️ 取得状況</button><button id="hallToggle" type="button">🏬 店舗</button></nav>
-    <div id="subtabs" class="subtabs mode-tabs"></div><section class="filter-panel"><div class="filter-actions info-toolbar"><select id="date" class="hidden" aria-label="カレンダー"><option>日付</option></select><span id="categoryStatus" class="category-status">🎰 機種選択</span><select id="sortOrder" aria-label="並び替え"><option value="number-asc">台番号順</option><option value="machine-asc">機種名順</option><option value="games-desc">G 多い順</option><option value="big-desc">B 多い順</option><option value="reg-desc">R 多い順</option><option value="bonus-rate">合算 良い順</option><option value="setting-desc">推定 高い順</option></select><button id="reload" class="reload" aria-label="データを更新">↻</button></div><div id="weekDates" class="week-dates"></div><div id="machineChecks" class="machine-checks-inline"></div><div id="hallBackdrop" class="sheet-backdrop hidden"></div><div id="hallSheet" class="hall-sheet hidden"></div></section><section id="content"></section>
+    <div id="subtabs" class="subtabs mode-tabs"></div><section class="filter-panel"><div class="filter-actions info-toolbar"><select id="date" class="hidden" aria-label="カレンダー"><option>日付</option></select><span id="categoryStatus" class="category-status">🎰 機種選択</span><button id="reload" class="reload" aria-label="データを更新">↻</button></div><div id="weekDates" class="week-dates"></div><div id="machineChecks" class="machine-checks-inline"></div><div id="hallBackdrop" class="sheet-backdrop hidden"></div><div id="hallSheet" class="hall-sheet hidden"></div></section><section id="content"></section>
     
   </div>
   <script src="config.js"></script>
