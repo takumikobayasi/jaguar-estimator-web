@@ -5,7 +5,7 @@
 })(typeof window !== 'undefined' ? window : globalThis, function () {
   'use strict';
 
-  const VERSION = '0.1.0';
+  const VERSION = '0.2.0';
   const DAY_MS = 86400000;
 
   const clamp = (value, min = 0, max = 100) => Math.max(min, Math.min(max, value));
@@ -303,8 +303,11 @@
       const score = Math.round(priorScore * priorWeight + liveScore * liveWeight + neighborScore * neighborWeight);
       let status = '見送り';
       if (games <= 1000 || row._p4 == null) status = 'データ不足';
-      else if (score >= 68 && row._p4 >= 0.5) status = '座る候補';
-      else if (score >= 52) status = '様子見';
+      else if (
+        (games >= 2500 && row._p4 >= 0.70 && score >= 60) ||
+        (games >= 4000 && row._p4 >= 0.60 && score >= 55)
+      ) status = '座る候補';
+      else if (score >= 50 && row._p4 >= 0.50) status = '様子見';
       const confidence = games >= 4000 ? '高' : games >= 2500 ? '中' : games > 1000 ? '低' : '不足';
       return {
         ...row,
@@ -344,7 +347,9 @@
       const predictions = results.filter(result => result.prediction.machine === model.machine);
       const decided = predictions.filter(result => result.decided);
       const hits = predictions.filter(result => result.hit).length;
-      const expected = eligible.length ? predictions.length * strong.length / eligible.length : 0;
+      // Missing and low-play predictions cannot be hits, so exclude them from
+      // the random baseline just as they are excluded from measured precision.
+      const expected = eligible.length ? decided.length * strong.length / eligible.length : 0;
       return { machine: model.machine, picks: predictions.length, decided: decided.length, hits, eligible: eligible.length, strong: strong.length, expected };
     });
     const hits = results.filter(result => result.hit).length;
