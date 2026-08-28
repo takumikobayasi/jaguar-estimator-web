@@ -124,6 +124,32 @@
 
     .island-view-toggle{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:11px;padding:5px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}.island-view-toggle button{padding:9px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-size:11px;font-weight:850}.island-view-toggle button.active{background:#123528;color:var(--green)}.ranked-island-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.ranked-island-cell{min-width:0;padding:8px 5px;border:1px solid var(--line);border-radius:10px;background:var(--panel);text-align:center}.ranked-island-cell.top{border-color:var(--green);background:#102c24}.ranked-island-head{display:grid;gap:2px;justify-items:center}.ranked-island-rank{color:var(--green);font-size:13px;font-weight:950;line-height:1}.ranked-island-head b{font-size:12px;line-height:1.15}.ranked-island-name{margin-top:4px;color:var(--muted);font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ranked-island-result{margin-top:4px;font-size:8px;line-height:1.35;white-space:normal}@media(min-width:520px){.ranked-island-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.ranked-island-cell{padding:10px 7px}}html[data-theme="light"] .island-view-toggle,html[data-theme="light"] .ranked-island-cell{background:#fff}html[data-theme="light"] .island-view-toggle button.active{background:#e4f6ed}.gondola-list{display:grid;gap:12px}.gondola-card{padding:14px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}.gondola-card:first-child{border-color:var(--green);box-shadow:0 9px 28px #52e0a017}.gondola-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center}.gondola-rank{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:var(--green);color:#04150e;font-weight:950}.gondola-meta strong{display:block;font-size:13px}.gondola-meta span{display:block;margin-top:3px;color:var(--muted);font-size:9px}.gondola-score{text-align:right}.gondola-score strong{display:block;color:var(--green);font-size:20px}.gondola-score span{font-size:8px;color:var(--muted)}.gondola-result{margin-top:9px;padding:7px 9px;border-radius:9px;background:#172b3b;color:#baddf8;font-size:9px}
     html[data-theme="light"] .gondola-card{background:#fff}html[data-theme="light"] .gondola-result{background:#e8f4ff;color:#24547a}
+
+    /* Unified high-contrast palette for the light theme */
+    html[data-theme="light"] .island,
+    html[data-theme="light"] .machine-cell,
+    html[data-theme="light"] .ranked-island-cell,
+    html[data-theme="light"] .gondola-card{background:#fff;color:#17202b}
+    html[data-theme="light"] .machine-cell.predicted,
+    html[data-theme="light"] .ranked-island-cell.top{background:#eaf8f1;color:#113c2d;border-color:#21875f}
+    html[data-theme="light"] .prediction-rank{background:#147a52;color:#fff}
+    html[data-theme="light"] .result-label.good,
+    html[data-theme="light"] .ranked-island-rank{color:#126a49}
+    html[data-theme="light"] .result-label.wait,
+    html[data-theme="light"] .ranked-island-name{color:#667085}
+    html[data-theme="light"] .heat-good{background:#ffe3ea!important;color:#981b3a!important;border-color:#ef9caf}
+    html[data-theme="light"] .heat-mid{background:#fff0c7!important;color:#735100!important;border-color:#e7c76a}
+    html[data-theme="light"] .heat-bad{background:#e0f0ff!important;color:#155889!important;border-color:#9bc6ea}
+    html[data-theme="light"] .heat-good i,
+    html[data-theme="light"] .heat-mid i,
+    html[data-theme="light"] .heat-bad i{color:inherit}
+    html[data-theme="light"] .gondola-result{background:#e8f4ff;color:#24547a}
+    html[data-theme="light"] .target-rank{color:#07140f}
+    html[data-theme="light"] .target-hero:nth-child(2) .target-rank{background:#cbd5e1;color:#253348}
+    html[data-theme="light"] .target-hero:nth-child(3) .target-rank{background:#d6a77e;color:#3d2514}
+    html[data-theme="light"] .setting-text,
+    html[data-theme="light"] .prob,
+    html[data-theme="light"] .target-score strong{color:#126a49}
 </style>
 </head>
 <body>
@@ -135,7 +161,7 @@
     </section>
   </main>
   <div id="viewer" class="app hidden">
-    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v1.12.5</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="表示色を切り替える">☀</button><span class="live">閲覧専用</span></div></header>
+    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v1.12.6</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="表示色を切り替える">☀</button><span class="live">閲覧専用</span></div></header>
     <nav aria-label="メインメニュー"><button data-tab="history" class="active">📚 履歴</button><button data-tab="targets">🎯 狙い台</button><button data-tab="capture">🗓️ 取得状況</button><button id="hallToggle" type="button">🏬 店舗</button></nav>
     <div id="subtabs" class="subtabs mode-tabs"></div><section class="filter-panel"><div class="filter-actions info-toolbar"><select id="date" class="hidden" aria-label="カレンダー"><option>日付</option></select><span id="categoryStatus" class="category-status">🎰 機種選択</span><button id="reload" class="reload" aria-label="データを更新">↻</button></div><div id="weekDates" class="week-dates"></div><div id="machineChecks" class="machine-checks-inline"></div><div id="hallBackdrop" class="sheet-backdrop hidden"></div><div id="hallSheet" class="hall-sheet hidden"></div></section><section id="content"></section>
     
