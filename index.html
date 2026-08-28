@@ -114,6 +114,9 @@
     .week-dates{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}.week-date{min-width:0;padding:7px 2px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--muted);text-align:center}.week-date span{display:block;font-size:8px}.week-date b{display:block;margin-top:2px;font-size:12px}.week-date.active{border-color:var(--green);background:#123528;color:var(--green)}.week-date.sunday span{color:#ff7185}.week-date.saturday span{color:#55b7ff}
     .machine-checks-inline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.machine-checks-inline .machine-check{padding:7px 8px;font-size:9px}.category-status{display:flex;align-items:center;padding:0 8px;color:var(--muted);font-size:10px;font-weight:700}.info-toolbar{grid-template-columns:auto minmax(0,1fr) 42px}
     html[data-theme="light"] .week-date{background:#f6f8fb}html[data-theme="light"] .week-date.active{background:#e4f6ed}
+
+    .info-toolbar .reload{position:static!important;right:auto!important;margin:0!important;width:42px!important}.week-dates{position:relative;z-index:1}
+    @media(max-width:480px){.info-toolbar{grid-template-columns:auto minmax(0,1fr) 42px}.filter-panel{padding-bottom:12px}}
 </style>
 </head>
 <body>
@@ -125,7 +128,7 @@
     </section>
   </main>
   <div id="viewer" class="app hidden">
-    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v1.9.1</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="表示色を切り替える">☀</button><span class="live">閲覧専用</span></div></header>
+    <header><div><p class="eyebrow" style="margin-top:0">JUGGLER VIEW</p><div id="updated" class="updated"></div></div><div class="headmeta"><span class="version">WEB v1.9.2</span><button id="themeToggle" class="theme-toggle" type="button" aria-label="表示色を切り替える">☀</button><span class="live">閲覧専用</span></div></header>
     <nav aria-label="メインメニュー"><button data-tab="history" class="active">📚 履歴</button><button data-tab="targets">🎯 狙い台</button><button data-tab="lab">🧪 ラボ</button><button id="hallToggle" type="button">🏬 店舗</button></nav>
     <div id="subtabs" class="subtabs mode-tabs"></div><section class="filter-panel"><div class="filter-actions info-toolbar"><select id="date" class="hidden" aria-label="カレンダー"><option>日付</option></select><span id="categoryStatus" class="category-status">🎰 機種選択</span><select id="sortOrder" aria-label="並び替え"><option value="number-asc">台番号順</option><option value="machine-asc">機種名順</option><option value="games-desc">G 多い順</option><option value="big-desc">B 多い順</option><option value="reg-desc">R 多い順</option><option value="bonus-rate">合算 良い順</option><option value="setting-desc">推定 高い順</option></select><button id="reload" class="reload" aria-label="データを更新">↻</button></div><div id="weekDates" class="week-dates"></div><div id="machineChecks" class="machine-checks-inline"></div><div id="hallBackdrop" class="sheet-backdrop hidden"></div><div id="hallSheet" class="hall-sheet hidden"></div></section><section id="content"></section>
     
