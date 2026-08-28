@@ -23,7 +23,7 @@ function doPost(e) {
 
     const cache = CacheService.getScriptCache();
     const cacheKey = cacheKey_(latest, action, request);
-    const cached = cache.get(cacheKey);
+    const cached = action === 'summary' ? getChunkedCache_(cache, cacheKey) : cache.get(cacheKey);
     if (cached) return ContentService.createTextOutput(cached).setMimeType(ContentService.MimeType.JSON);
 
     const source = JSON.parse(latest.getBlob().getDataAsString('UTF-8'));
@@ -36,10 +36,43 @@ function doPost(e) {
       : convert_(source, latest);
     const text = JSON.stringify({ ok: true, data: output });
 
-    if (text.length < 90000) cache.put(cacheKey, text, CACHE_SECONDS);
+    if (action === 'summary') putChunkedCache_(cache, cacheKey, text);
+    else if (text.length < 90000) cache.put(cacheKey, text, CACHE_SECONDS);
     return ContentService.createTextOutput(text).setMimeType(ContentService.MimeType.JSON);
   } catch (error) {
     return json_({ ok: false, error: String(error.message || error) });
+  }
+}
+
+function getChunkedCache_(cache, key) {
+  const count = Number(cache.get(key + '-meta') || 0);
+  if (!count) return null;
+  let encoded = '';
+  for (let i = 0; i < count; i++) {
+    const chunk = cache.get(key + '-part-' + i);
+    if (!chunk) return null;
+    encoded += chunk;
+  }
+  try {
+    const bytes = Utilities.base64DecodeWebSafe(encoded);
+    return Utilities.ungzip(Utilities.newBlob(bytes)).getDataAsString('UTF-8');
+  } catch (_) {
+    return null;
+  }
+}
+
+function putChunkedCache_(cache, key, text) {
+  try {
+    const zipped = Utilities.gzip(Utilities.newBlob(text, 'application/json'));
+    const encoded = Utilities.base64EncodeWebSafe(zipped.getBytes());
+    const size = 80000;
+    const count = Math.ceil(encoded.length / size);
+    for (let i = 0; i < count; i++) {
+      cache.put(key + '-part-' + i, encoded.slice(i * size, (i + 1) * size), CACHE_SECONDS);
+    }
+    cache.put(key + '-meta', String(count), CACHE_SECONDS);
+  } catch (_) {
+    // キャッシュ失敗時も通常レスポンスは返す
   }
 }
 
