@@ -25,3 +25,11 @@ Android版 `jaguar-estimator` のデータを知り合いと共有するため�
 このフォルダの内容を公開用リポジトリのルート、またはPages対象の `docs/` に配置します。
 
 PINはGoogle Apps Script側で検証します。公開リポジトリへPINを直接記載しないでください。
+
+## 修正と検証（WEB v1.16.1）
+
+- 営業日の演算をUTCで統一し、日本時間で取得日・予想日・週の境界が1日ずれる問題を修正。
+- 取得カレンダーの先頭に曜日合わせの空欄を追加。
+- Apps ScriptはMIME形式に関係なく `jaguar-web-latest.json` を優先。固定名がない旧フォルダだけ全JSONの更新日時で選ぶ。
+- 回帰テスト: `node --test tests/regressions.test.cjs`（Node.js 22以上）。日本時間・UTC・米国時間、閏日、週初め、固定名・旧形式バックアップを検証する。
+- Apps Scriptの修正はGitHub Pagesの更新だけでは反映されない。[設定手順](apps-script/SETUP.md)に従い既存デプロイを更新する。

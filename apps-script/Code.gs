@@ -91,21 +91,20 @@ function cacheKey_(file, action, request) {
 }
 
 function latestBackup_(folderId) {
-  const files = DriveApp.getFolderById(folderId).getFilesByType(MimeType.PLAIN_TEXT);
+  // Androidの固定名JSONを優先する。DriveではJSONのMIME形式が保存経路で異なる。
+  const files = DriveApp.getFolderById(folderId).getFiles();
   let latest = null;
+  let webLatest = null;
   while (files.hasNext()) {
     const file = files.next();
     if (!/\.json$/i.test(file.getName())) continue;
     if (!latest || file.getLastUpdated() > latest.getLastUpdated()) latest = file;
-  }
-  if (!latest) {
-    const all = DriveApp.getFolderById(folderId).getFiles();
-    while (all.hasNext()) {
-      const file = all.next();
-      if (!/\.json$/i.test(file.getName())) continue;
-      if (!latest || file.getLastUpdated() > latest.getLastUpdated()) latest = file;
+    if (file.getName() === 'jaguar-web-latest.json' &&
+        (!webLatest || file.getLastUpdated() > webLatest.getLastUpdated())) {
+      webLatest = file;
     }
   }
+  if (webLatest) return webLatest;
   if (!latest) throw new Error('バックアップJSONが見つかりません');
   return latest;
 }
